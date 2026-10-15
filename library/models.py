@@ -59,6 +59,7 @@ class Book(models.Model):
         max_length=200,
         blank=True
     )
+    rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
 
     isbn = models.CharField(
         max_length=13,
@@ -135,3 +136,4 @@ class Book(models.Model):
             models.Index(fields=['title']),
             models.Index(fields=['genre']),
         ]
+    
