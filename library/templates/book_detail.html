@@ -1,56 +1,108 @@
+
 {% extends 'base.html' %}
+
 {% block title %}{{ book.title }} - My Library{% endblock %}
+
 {% block content %}
-<a href="{% url 'library:book-list' %}">&larr; Back to all books</a>
-<div class="row mt-3">
-<div class="col-md-4">
-{% if book.cover_image %}
-<img src="{{ book.cover_image.url }}" class="img-fluid rounded" alt="{{ book.title
-}}">
-{% endif %}
+<style>
+    .details-card {
+        max-width: 850px;
+        margin: 30px auto;
+        padding: 30px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.10);
+    }
+
+    .details-card h1 {
+        color: #17365d;
+        border-bottom: 3px solid #20b486;
+        padding-bottom: 15px;
+    }
+
+    .cover {
+        display: block;
+        max-width: 220px;
+        max-height: 300px;
+        object-fit: contain;
+        margin: 20px auto;
+        border-radius: 10px;
+    }
+
+    .info p {
+        padding: 12px;
+        margin: 8px 0;
+        background: #f1f5f9;
+        border-radius: 8px;
+        color: #334155;
+    }
+
+    .info strong {
+        color: #17365d;
+    }
+
+    .description {
+        padding: 18px;
+        background: #e8f7f1;
+        border-left: 4px solid #20b486;
+        border-radius: 8px;
+        line-height: 1.7;
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 12px 18px;
+        margin: 15px 8px 0 0;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .back {
+        background: #17365d;
+        color: white;
+    }
+
+    .edit {
+        background: #20a477;
+        color: white;
+    }
+</style>
+
+<div class="details-card">
+    <h1>📚 {{ book.title }}</h1>
+
+    {% if book.cover_image %}
+        <img src="{{ book.cover_image.url }}"
+             alt="{{ book.title }} cover"
+             class="cover">
+    {% endif %}
+
+    <div class="info">
+        <p><strong>Author:</strong> {{ book.author }}</p>
+        <p><strong>Publisher:</strong> {{ book.publisher|default:"Not provided" }}</p>
+        <p><strong>ISBN:</strong> {{ book.isbn|default:"Not provided" }}</p>
+        <p><strong>Genre:</strong> {{ book.genre|default:"Not provided" }}</p>
+        <p><strong>Publication date:</strong> {{ book.publication_date|default:"Not provided" }}</p>
+        <p><strong>Pages:</strong> {{ book.pages|default:"Not provided" }}</p>
+        <p><strong>Language:</strong> {{ book.language|default:"Not provided" }}</p>
+        <p><strong>Rating:</strong> ⭐ {{ book.rating }}/5</p>
+        <p><strong>Availability:</strong>
+            {% if book.is_available %}
+                <span style="color: #16845b;">Available</span>
+            {% else %}
+                <span style="color: #c0392b;">Not available</span>
+            {% endif %}
+        </p>
+    </div>
+
+    <h3 style="color: #17365d;">About this book</h3>
+    <div class="description">
+        {{ book.summary|default:"No description has been added yet." }}
+    </div>
+
+    <a href="/books/" class="btn back">← Back to Library</a>
+    <a href="{% url 'edit_book' book.pk %}" class="btn edit">✏️ Edit Book</a>
 </div>
-<div class="col-md-8">
-<h1>{{ book.title }}</h1>
-{% if book.subtitle %}<h5 class="text-muted">{{ book.subtitle }}</h5>{% endif %}
-<p><strong>Author:</strong> {{ book.author }}</p>
-<p><strong>Genre:</strong> {{ book.get_genre_display }}</p>
-<p><strong>Published:</strong> {{ book.publication_date }}</p>
-<p><strong>Pages:</strong> {{ book.pages }}</p>
-<p><strong>Rating:</strong> &#9733; {{ book.rating }}/5</p>
-<p>
-<strong>Status:</strong>
-{% if book.is_available %}
-<span class="badge bg-success">Available</span>
-{% else %}
-<span class="badge bg-secondary">Unavailable</span>
-{% endif %}
-</p>
-<h5 class="mt-4">Summary</h5>
-<p>{{ book.summary }}</p>
-{% if user.is_authenticated %}
-<div class="mt-4">
-<a href="{% url 'library:book-edit' book.pk %}" class="btn
-btn-outline-primary">Edit</a>
-href="{% url 'library:book-delete' book.pk %}"
-btn-outline-danger">Delete</a>
-</div>
-{% endif %}
-</div>
-</div>
-{% if similar_books %}
-<hr class="my-5">
-<h4>Similar Books</h4>
-<div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-3">
-{% for similar in similar_books %}
-<div class="col">
-<div class="card h-100">
-<div class="card-body">
-<h6 class="card-title">{{ similar.title|truncatewords:6 }}</h6>
-<a href="{% url 'library:book-detail' similar.pk %}" class="stretched-link"></a>
-</div>
-</div>
-</div>
-{% endfor %}
-</div>
-{% endif %}
 {% endblock %}
+
