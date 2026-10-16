@@ -1,0 +1,97 @@
+{% extends 'library/base.html' %}
+
+{% block title %}Book Form - My Library{% endblock %}
+
+{% block content %}
+<style>
+    .book-form-container {
+        max-width: 750px;
+        margin: 35px auto;
+        padding: 30px;
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(23, 54, 93, 0.12);
+        font-family: Arial, sans-serif;
+    }
+
+    .book-form-container h1 {
+        color: #17365d;
+        border-bottom: 3px solid #20b486;
+        padding-bottom: 15px;
+    }
+
+    .book-form-container p {
+        margin-bottom: 18px;
+        color: #333333;
+    }
+
+    .book-form-container label {
+        display: block;
+        font-weight: bold;
+        color: #17365d;
+        margin-bottom: 8px;
+    }
+
+    .book-form-container input,
+    .book-form-container select,
+    .book-form-container textarea {
+        box-sizing: border-box;
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: #f8fafc;
+        font-size: 15px;
+    }
+
+    .book-form-container input:focus,
+    .book-form-container select:focus,
+    .book-form-container textarea:focus {
+        outline: none;
+        border-color: #20b486;
+        box-shadow: 0 0 0 3px rgba(32, 180, 134, 0.15);
+    }
+
+    .form-button {
+        display: inline-block;
+        padding: 12px 22px;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 10px;
+        font-size: 15px;
+    }
+
+    .save-button {
+        background: #20a477;
+        color: white;
+    }
+
+    .cancel-button {
+        background: #e2e8f0;
+        color: #17365d;
+        margin-left: 8px;
+    }
+</style>
+
+<div class="book-form-container">
+    <h1>📚 Add or Edit a Book</h1>
+    <p>Enter the book information below.</p>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit" class="form-button save-button">
+            Save Book
+        </button>
+
+        <a href="/books/" class="form-button cancel-button">
+            Cancel
+        </a>
+    </form>
+</div>
+{% endblock %}
+
