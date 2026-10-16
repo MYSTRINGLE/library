@@ -1,58 +1,270 @@
-{% extends 'base.html' %}
- 
-{% block title %}Browse Books - My Library{% endblock %}
- 
-{% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-<h1>Browse Books</h1>
-</div>
- 
-<form method="get" class="row g-2 mb-4">
-<div class="col-md-6">{{ search_form.q }}</div>
-<div class="col-md-3">{{ search_form.genre }}</div>
-<div class="col-md-3">{{ search_form.sort }}</div>
-<div class="col-12">
-<button type="submit" class="btn btn-primary btn-sm">Search</button>
-<a href="{% url 'library:book-list' %}" class="btn btn-outline-secondary
-btn-sm">Clear</a>
-</div>
-</form>
- 
-<p class="text-muted">
-Showing {{ page_obj.start_index }}-{{ page_obj.end_index }}
-of {{ page_obj.paginator.count }} books
-{% if search_query %}matching "<strong>{{ search_query }}</strong>"{% endif %}
-</p>
- 
-<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-{% for book in page_obj %}
-<div class="col">
-<div class="card h-100">
-{% if book.cover_image %}
-<img src="{{ book.cover_image.url }}" class="card-img-top" alt="{{ book.title }}">
-{% endif %}
-<div class="card-body">
-<h5 class="card-title">{{ book.title|truncatewords:6 }}</h5>
-<p class="card-text text-muted mb-1">{{ book.author }}</p>
-<p class="card-text">&#9733; {{ book.rating }}/5</p>
-</div>
-<div class="card-footer bg-white border-0">
-<a href="{% url 'library:book-detail' book.pk %}" class="btn btn-primary btn-sm
-w-100">
-View
-</a>
-</div>
-</div>
-</div>
-{% empty %}
-<div class="col-12 text-center py-5">
-<h4>No books found</h4>
-<p class="text-muted">Try adjusting your search or filters.</p>
-</div>
-{% endfor %}
-</div>
-<div class="mt-4">
-{% include 'includes/pagination.html' with page_obj=page_obj query_params=query_params
-%}
-</div>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Library</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6fb;
+            color: #1e293b;
+        }
+
+        header {
+            background: #172554;
+            color: white;
+            padding: 28px 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0 0 8px;
+            font-size: 32px;
+        }
+
+        header p {
+            margin: 0;
+            color: #cbd5e1;
+        }
+
+        main {
+            max-width: 1150px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"] {
+            padding: 12px;
+            width: 280px;
+            max-width: 100%;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        button, .button {
+            display: inline-block;
+            padding: 11px 16px;
+            border: none;
+            border-radius: 8px;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        button:hover, .button:hover {
+            opacity: 0.88;
+        }
+
+        .add-button {
+            background: #15803d;
+        }
+
+        .book-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 22px;
+        }
+
+        .book-card {
+            background: white;
+            padding: 20px;
+            border-radius: 14px;
+            box-shadow: 0 4px 15px rgba(15, 23, 42, 0.07);
+            border: 1px solid #e2e8f0;
+        }
+
+        .book-card h2 {
+            font-size: 19px;
+            line-height: 1.4;
+            margin-top: 0;
+        }
+
+        .book-card h2 a {
+            color: #1d4ed8;
+            text-decoration: none;
+        }
+
+        .book-card h2 a:hover {
+            text-decoration: underline;
+        }
+
+        .book-cover {
+            display: block;
+            width: 140px;
+            height: 190px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin: 15px auto;
+            background: #e2e8f0;
+        }
+
+        .no-cover {
+            width: 140px;
+            height: 190px;
+            margin: 15px auto;
+            background: #e2e8f0;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #64748b;
+        }
+
+        .book-card p {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #475569;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+
+        .edit-button {
+            background: #d97706;
+        }
+
+        .delete-button {
+            background: #dc2626;
+        }
+
+        .empty-message {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            grid-column: 1 / -1;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        @media (max-width: 500px) {
+            header h1 {
+                font-size: 25px;
+            }
+
+            .search-form {
+                width: 100%;
+            }
+
+            input[type="text"] {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>📚 My Library</h1>
+    <p>Your personal collection of books</p>
+</header>
+
+<main>
+    <div class="toolbar">
+        <form method="GET" action="" class="search-form">
+            <input
+                type="text"
+                name="q"
+                placeholder="Search by title or author..."
+                value="{{ query }}"
+            >
+            <button type="submit">Search</button>
+        </form>
+
+        <a href="{% url 'add_book' %}" class="button add-button">
+            + Add Book
+        </a>
+    </div>
+
+    <div class="book-container">
+        {% for book in books %}
+            <div class="book-card">
+                <h2>
+                    <a href="{% url 'book_detail' book.pk %}">
+                        {{ book.title }}
+                    </a>
+                </h2>
+
+                {% if book.cover_image %}
+                    <img
+                        class="book-cover"
+                        src="{{ book.cover_image.url }}"
+                        alt="Cover of {{ book.title }}"
+                    >
+                {% else %}
+                    <div class="no-cover">📖<br>No cover image</div>
+                {% endif %}
+
+                <p>
+                    <strong>Author:</strong> {{ book.author }}
+                </p>
+
+                <p>
+                    <strong>Publisher:</strong>
+                    {{ book.publisher|default:"Not specified" }}
+                </p>
+
+                <div class="actions">
+                    <a href="{% url 'edit_book' book.pk %}"
+                       class="button edit-button">Edit</a>
+
+                    <a href="{% url 'delete_book' book.pk %}"
+                       class="button delete-button">Delete</a>
+                </div>
+            </div>
+        {% empty %}
+            <div class="empty-message">
+                <h2>No books found</h2>
+                <p>Try another search or add your first book.</p>
+                <a href="{% url 'add_book' %}" class="button add-button">
+                    + Add Book
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+</main>
+
+<footer>
+    © 2026 My Library · Built with Django
+</footer>
+
+</body>
+</html>
+
+
