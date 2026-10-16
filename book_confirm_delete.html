@@ -1,0 +1,13 @@
+
+<h1>DELETE BOOK TEST</h1>
+
+<p>If you can see this message, the page is displaying.</p>
+
+<p>Book: {{ book.title }}</p>
+
+<form method="POST">
+    {% csrf_token %}
+    <button type="submit">Yes, Delete</button>
+</form>
+
+<a href="{% url 'book_list' %}">Cancel</a>
